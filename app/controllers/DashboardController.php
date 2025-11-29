@@ -23,6 +23,12 @@ class DashboardController
         // Agora suportamos múltiplos gráficos por requisição
         $chartsData = [];
 
+        // Flags iniciais de plano para controlar UI
+        [$canUploadInitial, $planUploadErrorUpload] = PlanHelper::canUploadSpreadsheet($pdo, (int)$user['id']);
+        [$canGenerateInitial, $planChartErrorInitial] = PlanHelper::canGenerateCharts($pdo, (int)$user['id'], 1);
+        $planUploadLocked = !$canUploadInitial;
+        $planChartsLocked = !$canGenerateInitial;
+
         // Trata envio do AI Chart Generator
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $prompt        = trim($_POST['prompt'] ?? '');
@@ -34,6 +40,7 @@ class DashboardController
                 [$canUpload, $planUploadError] = PlanHelper::canUploadSpreadsheet($pdo, (int)$user['id']);
                 if (!$canUpload) {
                     $error = $planUploadError;
+                    $planUploadLocked = true;
                 } else {
                     $originalName = $_FILES['spreadsheet']['name'];
                     $tmpName      = $_FILES['spreadsheet']['tmp_name'];
@@ -75,6 +82,7 @@ class DashboardController
                 [$canGenerate, $planChartError] = PlanHelper::canGenerateCharts($pdo, (int)$user['id'], 1);
                 if (!$canGenerate) {
                     $error = $planChartError;
+                    $planChartsLocked = true;
                 }
             }
 

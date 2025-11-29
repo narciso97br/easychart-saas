@@ -362,7 +362,7 @@
 
             <?php if (!empty($error)): ?>
                 <div style="margin-bottom:10px;font-size:13px;color:#b91c1c;background:#fee2e2;border-radius:8px;padding:6px 8px;max-width:720px;">
-                    <?= htmlspecialchars($error) ?>
+                    <?= $error ?>
                 </div>
             <?php endif; ?>
             <?php if (!empty($success)): ?>
@@ -370,6 +370,11 @@
                     <?= htmlspecialchars($success) ?>
                 </div>
             <?php endif; ?>
+
+            <div style="margin-bottom:10px;font-size:13px;color:#6b7280;max-width:720px;">
+                <?= Lang::get('Want more uploads and charts?') ?>
+                <a href="<?= BASE_URL ?>?c=plans&a=index" style="color:#2563eb;font-weight:500;">Veja os planos</a>.
+            </div>
 
             <section class="card-large">
                 <div class="card-header">
@@ -397,7 +402,7 @@
                     <div class="field-row">
                         <div>
                             <div class="field-label"><?= Lang::get('Or upload a new spreadsheet') ?></div>
-                            <input type="file" name="spreadsheet" class="input">
+                            <input type="file" name="spreadsheet" class="input" <?= !empty($planUploadLocked) ? 'disabled' : '' ?>>
                             <div class="upload-note">
                                 <?= Lang::get('Supported formats: CSV (comma-separated)') ?> – <?= Lang::get('Supports CSV files up to 10MB') ?>.
                             </div>
@@ -411,7 +416,7 @@
                         </div>
                     </div>
 
-                    <button class="btn-generate" type="submit"><?= Lang::get('Generate') ?></button>
+                    <button class="btn-generate" type="submit" <?= !empty($planChartsLocked) ? 'disabled' : '' ?>><?= Lang::get('Generate') ?></button>
 
                     <div class="helper-box">
                         <?= Lang::get('Upload your first spreadsheet to start generating charts with AI') ?>.

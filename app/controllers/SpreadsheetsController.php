@@ -29,12 +29,17 @@ class SpreadsheetsController
         $error = '';
         $success = '';
 
+        // Verifica previamente se o plano permite novos uploads (usado na view para desabilitar o botão)
+        [$canUploadInitial, $planUploadMessage] = PlanHelper::canUploadSpreadsheet($this->pdo, $userId);
+        $planUploadLocked = !$canUploadInitial;
+
         // Upload
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['spreadsheet'])) {
             // Verifica limite de uploads do plano atual
             [$allowed, $planError] = PlanHelper::canUploadSpreadsheet($this->pdo, $userId);
             if (!$allowed) {
                 $error = $planError;
+                $planUploadLocked = true;
             } elseif ($_FILES['spreadsheet']['error'] === UPLOAD_ERR_OK) {
                 $originalName = $_FILES['spreadsheet']['name'];
                 $tmpName      = $_FILES['spreadsheet']['tmp_name'];
@@ -63,6 +68,9 @@ class SpreadsheetsController
                             'size_bytes'    => $sizeBytes,
                         ]);
                         $success = 'Spreadsheet uploaded successfully.';
+                        // Após upload bem‑sucedido, recalcula status do plano para a view
+                        [$canUploadInitial, $planUploadMessage] = PlanHelper::canUploadSpreadsheet($this->pdo, $userId);
+                        $planUploadLocked = !$canUploadInitial;
                     } else {
                         $error = 'Failed to save uploaded file.';
                     }

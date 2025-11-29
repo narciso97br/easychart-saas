@@ -242,6 +242,87 @@ class AdminController
         exit;
     }
 
+    public function plans()
+    {
+        $this->requireSuperAdmin();
+
+        $stmt = $this->pdo->query('SELECT * FROM plans ORDER BY price_cents ASC');
+        $plans = $stmt->fetchAll();
+
+        require __DIR__ . '/../views/admin/plans_index.php';
+    }
+
+    public function editPlan()
+    {
+        $this->requireSuperAdmin();
+
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $error = '';
+        $success = false;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name   = trim($_POST['name'] ?? '');
+            $slug   = trim($_POST['slug'] ?? '');
+            $price  = (int)($_POST['price_cents'] ?? 0);
+            $spreadLimit = $_POST['monthly_spreadsheet_limit'] !== '' ? (int)$_POST['monthly_spreadsheet_limit'] : null;
+            $chartLimit  = $_POST['monthly_chart_limit'] !== '' ? (int)$_POST['monthly_chart_limit'] : null;
+            $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+            if ($name === '' || $slug === '') {
+                $error = 'Informe nome e slug do plano.';
+            } else {
+                if ($id > 0) {
+                    $stmt = $this->pdo->prepare('UPDATE plans SET name = :name, slug = :slug, price_cents = :price, monthly_spreadsheet_limit = :s_limit, monthly_chart_limit = :c_limit, is_active = :active WHERE id = :id');
+                    $stmt->execute([
+                        'name'    => $name,
+                        'slug'    => $slug,
+                        'price'   => $price,
+                        's_limit' => $spreadLimit,
+                        'c_limit' => $chartLimit,
+                        'active'  => $isActive,
+                        'id'      => $id,
+                    ]);
+                } else {
+                    $stmt = $this->pdo->prepare('INSERT INTO plans (name, slug, price_cents, monthly_spreadsheet_limit, monthly_chart_limit, is_active) VALUES (:name, :slug, :price, :s_limit, :c_limit, :active)');
+                    $stmt->execute([
+                        'name'    => $name,
+                        'slug'    => $slug,
+                        'price'   => $price,
+                        's_limit' => $spreadLimit,
+                        'c_limit' => $chartLimit,
+                        'active'  => $isActive,
+                    ]);
+                    $id = (int)$this->pdo->lastInsertId();
+                }
+
+                $success = true;
+            }
+        }
+
+        $plan = null;
+        if ($id > 0) {
+            $stmt = $this->pdo->prepare('SELECT * FROM plans WHERE id = :id');
+            $stmt->execute(['id' => $id]);
+            $plan = $stmt->fetch();
+        }
+
+        require __DIR__ . '/../views/admin/plans_form.php';
+    }
+
+    public function deletePlan()
+    {
+        $this->requireSuperAdmin();
+
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0) {
+            $stmt = $this->pdo->prepare('DELETE FROM plans WHERE id = :id');
+            $stmt->execute(['id' => $id]);
+        }
+
+        header('Location: ' . BASE_URL . '?c=admin&a=plans');
+        exit;
+    }
+
     public function toggleStatus()
     {
         $this->requireSuperAdmin();

@@ -88,7 +88,7 @@
         <div class="page-subtitle"><?= Lang::get('Manage your spreadsheets and upload new files') ?></div>
 
         <?php if (!empty($error)): ?>
-            <div class="flash-error"><?= htmlspecialchars($error) ?></div>
+            <div class="flash-error"><?= $error ?></div>
         <?php endif; ?>
         <?php if (!empty($success)): ?>
             <div class="flash-success"><?= htmlspecialchars($success) ?></div>
@@ -98,8 +98,8 @@
             <div class="upload-title"><?= Lang::get('Upload CSV File') ?></div>
             <form method="post" enctype="multipart/form-data">
                 <div class="upload-box">
-                    <input type="file" name="spreadsheet" accept=".csv" required>
-                    <button class="btn-primary" type="submit"><?= Lang::get('Choose File') ?></button>
+                    <input type="file" name="spreadsheet" accept=".csv" <?= !empty($planUploadLocked) ? 'disabled' : 'required' ?>>
+                    <button class="btn-primary" type="submit" <?= !empty($planUploadLocked) ? 'disabled' : '' ?>><?= Lang::get('Choose File') ?></button>
                 </div>
                 <div class="upload-note">
                     <?= Lang::get('Supported formats: CSV (comma-separated)') ?> – <?= Lang::get('Supports CSV files up to 10MB') ?>.

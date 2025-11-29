@@ -91,6 +91,9 @@
             <a class="btn-secondary" href="<?= BASE_URL ?>?c=admin&a=asaasSettings">
                 💳 Asaas settings
             </a>
+            <a class="btn-secondary" href="<?= BASE_URL ?>?c=admin&a=plans">
+                📦 Gerenciar planos
+            </a>
         </div>
 
         <section class="kpi-grid">
