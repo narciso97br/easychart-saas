@@ -56,7 +56,9 @@ class PlanHelper
         $count = (int)$stmt->fetch()['c'];
 
         if ($spreadsheetLimit !== null && $count >= (int)$spreadsheetLimit) {
-            return [false, 'No plano Free você pode enviar apenas 1 planilha por mês. Assine o Premium para ter uploads ilimitados.'];
+            return [false, 'No plano Free você pode enviar apenas 1 planilha por mês. '
+                . 'Assine o Premium para ter uploads ilimitados. '
+                . '<a href="' . BASE_URL . '?c=asaas&a=showCheckout">Clique aqui para assinar</a>.'];
         }
 
         return [true, null];
@@ -87,7 +89,9 @@ class PlanHelper
         $count = (int)$stmt->fetch()['c'];
 
         if ($chartLimit !== null && ($count >= (int)$chartLimit || ($count + $newChartsCount) > (int)$chartLimit)) {
-            return [false, 'No plano Free você pode gerar apenas 1 gráfico por mês. Assine o Premium para desbloquear gráficos ilimitados.'];
+            return [false, 'No plano Free você pode gerar apenas 1 gráfico por mês. '
+                . 'Assine o Premium para desbloquear gráficos ilimitados. '
+                . '<a href="' . BASE_URL . '?c=asaas&a=showCheckout">Clique aqui para assinar</a>.'];
         }
 
         return [true, null];

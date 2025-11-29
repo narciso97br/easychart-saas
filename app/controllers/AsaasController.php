@@ -24,6 +24,24 @@ class AsaasController
         }
     }
 
+    public function showCheckout()
+    {
+        $this->requireAuth();
+        $userSession = $_SESSION['user'];
+        $userId = (int)$userSession['id'];
+
+        $stmt = $this->pdo->prepare('SELECT full_name, email, cpf, phone FROM users WHERE id = :id');
+        $stmt->execute(['id' => $userId]);
+        $userRow = $stmt->fetch();
+
+        // Carrega info do plano premium (opcional, para mostrar preço/benefícios)
+        $planStmt = $this->pdo->prepare("SELECT * FROM plans WHERE slug = 'premium' LIMIT 1");
+        $planStmt->execute();
+        $premiumPlan = $planStmt->fetch();
+
+        require __DIR__ . '/../views/asaas/checkout.php';
+    }
+
     public function subscribePremium()
     {
         $this->requireAuth();
@@ -105,7 +123,7 @@ class AsaasController
                     $upd->execute([
                         'name' => $fullName,
                         'cpf'  => $cpf,
-                        'phone'=> $phone,
+                        'phone' => $phone,
                         'cust' => $asaasCustomerId,
                         'id'   => $userId,
                     ]);

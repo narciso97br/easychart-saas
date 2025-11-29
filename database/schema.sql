@@ -115,3 +115,13 @@ ALTER TABLE users
 -- 11) Índice único em cpf (20251128_100000_add_unique_cpf_to_users)
 ALTER TABLE users
     ADD UNIQUE KEY idx_users_cpf_unique (cpf);
+
+INSERT INTO plans (name, slug, price_cents, currency, monthly_spreadsheet_limit, monthly_chart_limit, description, is_active)
+VALUES
+  ('Free', 'free', 0, 'BRL', 1, 1, 'Plano gratuito: 1 upload e 1 gráfico por mês.', 1),
+  ('Premium', 'premium', 2990, 'BRL', NULL, NULL, 'Uploads e gráficos ilimitados.', 1)
+ON DUPLICATE KEY UPDATE
+  monthly_spreadsheet_limit = VALUES(monthly_spreadsheet_limit),
+  monthly_chart_limit       = VALUES(monthly_chart_limit),
+  description               = VALUES(description),
+  is_active                 = VALUES(is_active);

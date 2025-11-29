@@ -70,14 +70,14 @@
                 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'super_admin'): ?>
                 <a href="<?= BASE_URL ?>?c=admin&a=index"><?= Lang::get('AI Admin') ?></a>
                 <?php endif; ?>
-                <div class="lang-switcher">
-                    <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=pt" class="<?= Lang::getCurrentLang() === 'pt' ? 'active' : '' ?>">PT</a>
-                    <span>|</span>
-                    <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=en" class="<?= Lang::getCurrentLang() === 'en' ? 'active' : '' ?>">EN</a>
-                </div>
             </nav>
         </div>
         <div class="topbar-right">
+            <div class="lang-switcher">
+                <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=pt" class="<?= Lang::getCurrentLang() === 'pt' ? 'active' : '' ?>">PT</a>
+                <span>|</span>
+                <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=en" class="<?= Lang::getCurrentLang() === 'en' ? 'active' : '' ?>">EN</a>
+            </div>
             <span><?= Lang::get('Welcome') ?>, <?= isset($_SESSION['user']['full_name']) ? htmlspecialchars($_SESSION['user']['full_name']) : 'User' ?></span>
             <a href="<?= BASE_URL ?>?c=dashboard&a=logout"><?= Lang::get('Logout') ?></a>
         </div>
@@ -102,7 +102,11 @@
                     <input type="file" name="spreadsheet" accept=".csv" required>
                     <button class="btn-primary" type="submit"><?= Lang::get('Choose File') ?></button>
                 </div>
-                <div class="upload-note"><?= Lang::get('Supports CSV files up to 10MB') ?>.</div>
+<div class="upload-subtitle">
+    <?= Lang::get('Upload your spreadsheet to start creating amazing visualizations') ?><br>
+    <strong><?= Lang::get('Supported formats: CSV (comma-separated)') ?></strong>
+</div>
+<div class="upload-note"><?= Lang::get('Supports CSV files up to 10MB') ?>.</div>
             </form>
         </section>
 

@@ -64,23 +64,15 @@ class AuthController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fullName        = trim($_POST['full_name'] ?? '');
             $email           = trim($_POST['email'] ?? '');
-            $cpfRaw          = $_POST['cpf'] ?? '';
-            $cpf             = preg_replace('/\D+/', '', $cpfRaw);
             $password        = $_POST['password'] ?? '';
             $passwordConfirm = $_POST['password_confirm'] ?? '';
 
             if ($password !== $passwordConfirm) {
                 $error = 'Passwords do not match.';
-            } elseif ($cpf === '') {
-                $error = 'CPF is required.';
             } elseif (User::findByEmail($email)) {
                 $error = 'Email already registered.';
-            } elseif (User::findByCpf($cpf)) {
-                // CPF já cadastrado: redireciona para login com mensagem
-                header('Location: ' . BASE_URL . '?c=auth&a=login&msg=cpf_exists');
-                exit;
             } else {
-                if (User::create($fullName, $email, $password, $cpf)) {
+                if (User::create($fullName, $email, $password, null)) {
                     $success = true;
                 } else {
                     $error = 'Error creating account.';

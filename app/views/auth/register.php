@@ -192,12 +192,6 @@
                 <input type="text" name="full_name" placeholder="<?= Lang::get('Full Name') ?>" required>
             </div>
 
-            <label><?= Lang::get('CPF') ?></label>
-            <div class="input-wrapper">
-                <span class="input-icon">ID</span>
-                <input type="text" name="cpf" placeholder="CPF" required>
-            </div>
-
             <label><?= Lang::get('Email Address') ?></label>
             <div class="input-wrapper">
                 <span class="input-icon">&#9993;</span>

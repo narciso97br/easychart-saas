@@ -56,14 +56,14 @@
                 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'super_admin'): ?>
                 <a href="<?= BASE_URL ?>?c=admin&a=index"><?= Lang::get('AI Admin') ?></a>
                 <?php endif; ?>
-                <div class="lang-switcher">
-                    <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=pt" class="<?= Lang::getCurrentLang() === 'pt' ? 'active' : '' ?>">PT</a>
-                    <span>|</span>
-                    <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=en" class="<?= Lang::getCurrentLang() === 'en' ? 'active' : '' ?>">EN</a>
-                </div>
             </nav>
         </div>
         <div class="topbar-right">
+            <div class="lang-switcher">
+                <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=pt" class="<?= Lang::getCurrentLang() === 'pt' ? 'active' : '' ?>">PT</a>
+                <span>|</span>
+                <a href="<?= BASE_URL ?>?c=lang&a=switch&lang=en" class="<?= Lang::getCurrentLang() === 'en' ? 'active' : '' ?>">EN</a>
+            </div>
             <span><?= Lang::get('Welcome') ?>, <?= isset($_SESSION['user']['full_name']) ? htmlspecialchars($_SESSION['user']['full_name']) : 'User' ?></span>
             <a href="<?= BASE_URL ?>?c=dashboard&a=logout"><?= Lang::get('Logout') ?></a>
         </div>
@@ -71,7 +71,7 @@
 
     <main class="content">
         <div class="page-title"><?= Lang::get('Settings') ?></div>
-        <div class="page-subtitle"><?= Lang::get('Manage your account preferences and API configurations') ?></div>
+        <div class="page-subtitle"><?= Lang::get('Manage your account preferences and profile') ?></div>
 
         <?php if (!empty($error)): ?>
             <div class="flash-error"><?= htmlspecialchars($error) ?></div>
@@ -90,29 +90,13 @@
 
                 <label><?= Lang::get('Email Address') ?></label>
                 <input class="input" name="email" value="<?= htmlspecialchars($userRow['email'] ?? '') ?>" disabled>
+
+                <label>CPF</label>
+                <input class="input" name="cpf" value="<?= htmlspecialchars($userRow['cpf'] ?? '') ?>" placeholder="000.000.000-00">
+
+                <label><?= Lang::get('Phone') ?></label>
+                <input class="input" name="phone" value="<?= htmlspecialchars($userRow['phone'] ?? '') ?>" placeholder="(00) 00000-0000">
             </section>
-
-            <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'super_admin'): ?>
-            <section class="section">
-                <div class="section-title"><?= Lang::get('API Configuration') ?></div>
-                <div class="section-subtitle"><?= Lang::get('Configure your API key used for AI chart generation') ?></div>
-
-                <label><?= Lang::get('OpenAI API Key') ?></label>
-                <input class="input" name="api_key" value="<?= htmlspecialchars($apiKeyValue) ?>" placeholder="sk-...">
-
-                <label>Asaas Sandbox API Key</label>
-                <input class="input" name="asaas_sandbox_key" value="<?= htmlspecialchars($asaasSandboxKeyValue ?? '') ?>" placeholder="sandbox_...">
-
-                <label>Asaas Production API Key</label>
-                <input class="input" name="asaas_production_key" value="<?= htmlspecialchars($asaasProductionKeyValue ?? '') ?>" placeholder="prod_...">
-
-                <label>Asaas Environment</label>
-                <select class="input" name="asaas_env">
-                    <option value="sandbox" <?= ($asaasEnvValue ?? 'sandbox') === 'sandbox' ? 'selected' : '' ?>>Sandbox</option>
-                    <option value="production" <?= ($asaasEnvValue ?? 'sandbox') === 'production' ? 'selected' : '' ?>>Production</option>
-                </select>
-            </section>
-            <?php endif; ?>
 
             <section class="section">
                 <div class="section-title"><?= Lang::get('Notification Preferences') ?></div>
@@ -132,40 +116,29 @@
                 </div>
             </section>
 
-            <button class="btn-primary" type="submit"><?= Lang::get('Save Changes') ?></button>
-        </form>
-
-        <form method="post" action="<?= BASE_URL ?>?c=asaas&a=subscribePremium" style="margin-top:16px;">
             <section class="section">
-                <div class="section-title">Assinatura do Plano Premium</div>
-                <div class="section-subtitle">Preencha seus dados para assinar o plano Premium mensal via Asaas.</div>
+                <div class="section-title"><?= Lang::get('Change Password') ?></div>
+                <div class="section-subtitle"><?= Lang::get('Leave blank if you do not want to change your password') ?></div>
 
-                <label>Nome completo</label>
-                <input class="input" name="full_name" value="<?= htmlspecialchars($userRow['full_name'] ?? '') ?>" required>
+                <label><?= Lang::get('Current Password') ?></label>
+                <input class="input" type="password" name="current_password" placeholder="<?= Lang::get('Current Password') ?>">
 
-                <label>CPF</label>
-                <input class="input" name="cpf" placeholder="000.000.000-00" required>
+                <label><?= Lang::get('New Password') ?></label>
+                <input class="input" type="password" name="new_password" placeholder="<?= Lang::get('New Password') ?>">
 
-                <label>Telefone</label>
-                <input class="input" name="phone" placeholder="(00) 00000-0000" required>
-
-                <label>Nome impresso no cartão</label>
-                <input class="input" name="card_holder_name" placeholder="Como aparece no cartão" required>
-
-                <label>Número do cartão</label>
-                <input class="input" name="card_number" placeholder="0000 0000 0000 0000" required>
-
-                <label>Validade (mês/ano)</label>
-                <div style="display:flex;gap:8px;">
-                    <input class="input" name="card_exp_month" placeholder="MM" style="max-width:80px;" required>
-                    <input class="input" name="card_exp_year" placeholder="AAAA" style="max-width:120px;" required>
-                </div>
-
-                <label>CVV</label>
-                <input class="input" name="card_cvv" placeholder="CVV" style="max-width:120px;" required>
+                <label><?= Lang::get('Confirm New Password') ?></label>
+                <input class="input" type="password" name="new_password_confirm" placeholder="<?= Lang::get('Confirm New Password') ?>">
             </section>
 
-            <button class="btn-primary" type="submit">Assinar Premium</button>
+            <section class="section">
+                <div class="section-title"><?= Lang::get('API Configuration') ?></div>
+                <div class="section-subtitle"><?= Lang::get('Configure your API key used for AI chart generation') ?></div>
+
+                <label><?= Lang::get('OpenAI API Key') ?></label>
+                <input class="input" name="api_key" value="<?= htmlspecialchars($apiKeyValue) ?>" placeholder="sk-...">
+            </section>
+
+            <button class="btn-primary" type="submit"><?= Lang::get('Save Changes') ?></button>
         </form>
     </main>
 </div>

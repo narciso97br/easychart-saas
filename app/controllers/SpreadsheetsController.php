@@ -41,27 +41,31 @@ class SpreadsheetsController
                 $mimeType     = $_FILES['spreadsheet']['type'];
                 $sizeBytes    = (int) $_FILES['spreadsheet']['size'];
 
-                $ext = pathinfo($originalName, PATHINFO_EXTENSION);
-                $storedName = uniqid('sheet_', true) . '.' . $ext;
-
-                $storageDir = __DIR__ . '/../../storage/spreadsheets';
-                if (!is_dir($storageDir)) {
-                    mkdir($storageDir, 0777, true);
-                }
-
-                $destPath = $storageDir . '/' . $storedName;
-                if (move_uploaded_file($tmpName, $destPath)) {
-                    $stmt = $this->pdo->prepare('INSERT INTO spreadsheets (user_id, original_name, stored_name, mime_type, size_bytes) VALUES (:user_id, :original_name, :stored_name, :mime_type, :size_bytes)');
-                    $stmt->execute([
-                        'user_id'       => $userId,
-                        'original_name' => $originalName,
-                        'stored_name'   => $storedName,
-                        'mime_type'     => $mimeType,
-                        'size_bytes'    => $sizeBytes,
-                    ]);
-                    $success = 'Spreadsheet uploaded successfully.';
+                $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+                if ($ext !== 'csv') {
+                    $error = 'Only CSV files are supported.';
                 } else {
-                    $error = 'Failed to save uploaded file.';
+                    $storedName = uniqid('sheet_', true) . '.' . $ext;
+
+                    $storageDir = __DIR__ . '/../../storage/spreadsheets';
+                    if (!is_dir($storageDir)) {
+                        mkdir($storageDir, 0777, true);
+                    }
+
+                    $destPath = $storageDir . '/' . $storedName;
+                    if (move_uploaded_file($tmpName, $destPath)) {
+                        $stmt = $this->pdo->prepare('INSERT INTO spreadsheets (user_id, original_name, stored_name, mime_type, size_bytes) VALUES (:user_id, :original_name, :stored_name, :mime_type, :size_bytes)');
+                        $stmt->execute([
+                            'user_id'       => $userId,
+                            'original_name' => $originalName,
+                            'stored_name'   => $storedName,
+                            'mime_type'     => $mimeType,
+                            'size_bytes'    => $sizeBytes,
+                        ]);
+                        $success = 'Spreadsheet uploaded successfully.';
+                    } else {
+                        $error = 'Failed to save uploaded file.';
+                    }
                 }
             } else {
                 $error = 'Upload error code: ' . (int) $_FILES['spreadsheet']['error'];
