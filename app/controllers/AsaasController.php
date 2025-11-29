@@ -60,6 +60,7 @@ class AsaasController
         $fullName = trim($_POST['full_name'] ?? '');
         $cpf      = preg_replace('/\D+/', '', $_POST['cpf'] ?? '');
         $phone    = preg_replace('/\D+/', '', $_POST['phone'] ?? '');
+        $postalCode = preg_replace('/\D+/', '', $_POST['card_postal_code'] ?? '');
 
         $cardHolder = trim($_POST['card_holder_name'] ?? '');
         $cardNumber = preg_replace('/\D+/', '', $_POST['card_number'] ?? '');
@@ -67,7 +68,7 @@ class AsaasController
         $expYear    = trim($_POST['card_exp_year'] ?? '');
         $cardCvv    = trim($_POST['card_cvv'] ?? '');
 
-        if ($fullName === '' || $cpf === '' || $phone === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
+        if ($fullName === '' || $cpf === '' || $phone === '' || $postalCode === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
             $error = 'Preencha todos os campos obrigatórios para assinar o plano Premium.';
         }
 
@@ -130,10 +131,11 @@ class AsaasController
 
                     // Cria assinatura mensal
                     $holderInfo = [
-                        'name'  => $fullName,
-                        'email' => $userRow['email'],
-                        'cpf'   => $cpf,
-                        'phone' => $phone,
+                        'name'        => $fullName,
+                        'email'       => $userRow['email'],
+                        'cpf'         => $cpf,
+                        'phone'       => $phone,
+                        'postal_code' => $postalCode,
                     ];
                     $cardData = [
                         'holder_name' => $cardHolder,

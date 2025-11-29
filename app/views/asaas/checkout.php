@@ -242,6 +242,9 @@
                     <label>Telefone</label>
                     <input class="input" name="phone" value="<?= htmlspecialchars($userRow['phone'] ?? '') ?>" placeholder="(00) 00000-0000" required>
 
+                    <label>CEP do titular</label>
+                    <input class="input" name="card_postal_code" placeholder="00000-000" required>
+
                     <div class="section-title" style="font-size:16px;margin-top:10px;">Dados do cartão</div>
 
                     <label>Nome impresso no cartão</label>
