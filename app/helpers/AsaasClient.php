@@ -52,7 +52,7 @@ class AsaasClient
     {
         $ch = curl_init($url);
         $headers = [
-            'Authorization: Bearer ' . $apiKey,
+            'access_token: ' . $apiKey,
             'Content-Type: application/json',
         ];
 

@@ -372,7 +372,7 @@
             <?php endif; ?>
 
             <div style="margin-bottom:10px;font-size:13px;color:#6b7280;max-width:720px;">
-                <?= Lang::get('Want more uploads and charts?') ?>
+                Quer mais uploads e gráficos por mês?
                 <a href="<?= BASE_URL ?>?c=plans&a=index" style="color:#2563eb;font-weight:500;">Veja os planos</a>.
             </div>
 

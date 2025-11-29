@@ -138,6 +138,13 @@
                 <input class="input" name="api_key" value="<?= htmlspecialchars($apiKeyValue) ?>" placeholder="sk-...">
             </section>
 
+            <section class="section">
+                <div class="section-title"><?= Lang::get('Plans') ?></div>
+                <div class="section-subtitle"><?= Lang::get('Access your plans') ?></div>
+
+                <a href="<?= BASE_URL ?>?c=plans&a=index" class="btn-primary"><?= Lang::get('Access Plans') ?></a>
+            </section>
+
             <button class="btn-primary" type="submit"><?= Lang::get('Save Changes') ?></button>
         </form>
     </main>
