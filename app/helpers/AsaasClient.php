@@ -151,6 +151,7 @@ class AsaasClient
                 'cpfCnpj'     => $holderInfo['cpf'],
                 'mobilePhone' => $holderInfo['phone'],
                 'postalCode'  => $holderInfo['postal_code'] ?? null,
+                'addressNumber' => $holderInfo['address_number'] ?? null,
             ],
         ];
 

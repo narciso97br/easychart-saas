@@ -57,10 +57,11 @@ class AsaasController
         }
 
         // Dados do formulário
-        $fullName = trim($_POST['full_name'] ?? '');
-        $cpf      = preg_replace('/\D+/', '', $_POST['cpf'] ?? '');
-        $phone    = preg_replace('/\D+/', '', $_POST['phone'] ?? '');
-        $postalCode = preg_replace('/\D+/', '', $_POST['card_postal_code'] ?? '');
+        $fullName    = trim($_POST['full_name'] ?? '');
+        $cpf         = preg_replace('/\D+/', '', $_POST['cpf'] ?? '');
+        $phone       = preg_replace('/\D+/', '', $_POST['phone'] ?? '');
+        $postalCode  = preg_replace('/\D+/', '', $_POST['card_postal_code'] ?? '');
+        $addressNumber = trim($_POST['card_address_number'] ?? '');
 
         $cardHolder = trim($_POST['card_holder_name'] ?? '');
         $cardNumber = preg_replace('/\D+/', '', $_POST['card_number'] ?? '');
@@ -68,7 +69,7 @@ class AsaasController
         $expYear    = trim($_POST['card_exp_year'] ?? '');
         $cardCvv    = trim($_POST['card_cvv'] ?? '');
 
-        if ($fullName === '' || $cpf === '' || $phone === '' || $postalCode === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
+        if ($fullName === '' || $cpf === '' || $phone === '' || $postalCode === '' || $addressNumber === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
             $error = 'Preencha todos os campos obrigatórios para assinar o plano Premium.';
         }
 
@@ -131,11 +132,12 @@ class AsaasController
 
                     // Cria assinatura mensal
                     $holderInfo = [
-                        'name'        => $fullName,
-                        'email'       => $userRow['email'],
-                        'cpf'         => $cpf,
-                        'phone'       => $phone,
-                        'postal_code' => $postalCode,
+                        'name'          => $fullName,
+                        'email'         => $userRow['email'],
+                        'cpf'           => $cpf,
+                        'phone'         => $phone,
+                        'postal_code'   => $postalCode,
+                        'address_number'=> $addressNumber,
                     ];
                     $cardData = [
                         'holder_name' => $cardHolder,
