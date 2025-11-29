@@ -39,6 +39,29 @@ class PlansController
             }
         }
 
+        // Descobre o plano atual do usuário logado
+        $currentPlanSlug = null;
+        $isAdminUnlimited = false;
+
+        if (!empty($_SESSION['user'])) {
+            $role = $_SESSION['user']['role'] ?? 'user';
+            if ($role === 'super_admin') {
+                // Admin sempre é tratado como plano ilimitado
+                $isAdminUnlimited = true;
+                $currentPlanSlug = 'admin_unlimited';
+            } else {
+                $userPlanId = $_SESSION['user']['plan_id'] ?? null;
+                if ($userPlanId) {
+                    foreach ($plans as $plan) {
+                        if ((int)$plan['id'] === (int)$userPlanId) {
+                            $currentPlanSlug = $plan['slug'] ?? null;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         require __DIR__ . '/../views/plans/index.php';
     }
 }

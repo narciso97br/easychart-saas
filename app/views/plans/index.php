@@ -62,6 +62,27 @@
         <div class="page-title">Escolha o plano ideal para você</div>
         <div class="page-subtitle">Comece grátis e faça o upgrade para ter uploads e gráficos ilimitados quando estiver pronto.</div>
 
+        <?php
+        $currentLabel = 'Free';
+        $alreadyPremium = false;
+
+        if (!empty($isAdminUnlimited)) {
+            $currentLabel = 'Ilimitado (admin)';
+            $alreadyPremium = true;
+        } elseif (!empty($currentPlanSlug)) {
+            if ($currentPlanSlug === 'premium') {
+                $currentLabel = 'Premium';
+                $alreadyPremium = true;
+            } elseif ($currentPlanSlug === 'free') {
+                $currentLabel = 'Free';
+            }
+        }
+        ?>
+
+        <div class="page-subtitle" style="margin-top:-8px;margin-bottom:20px;color:#4b5563;">
+            Seu plano atual: <strong><?= htmlspecialchars($currentLabel) ?></strong>
+        </div>
+
         <section class="plans-grid">
             <?php if (!empty($freePlan)): ?>
                 <article class="plan-card">
@@ -103,7 +124,12 @@
                     </div>
                     <div class="plan-feature">Suporte prioritário por e-mail</div>
                     <div class="plan-feature">Cobrança automática segura via Asaas</div>
-                    <a class="btn-primary" href="<?= BASE_URL ?>?c=asaas&a=showCheckout">Assinar Premium</a>
+
+                    <?php if (!empty($alreadyPremium)): ?>
+                        <span class="plan-feature" style="font-weight:600;color:#16a34a;">Este é o seu plano atual</span>
+                    <?php else: ?>
+                        <a class="btn-primary" href="<?= BASE_URL ?>?c=asaas&a=showCheckout">Assinar Premium</a>
+                    <?php endif; ?>
                 </article>
             <?php endif; ?>
         </section>

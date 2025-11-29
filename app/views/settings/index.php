@@ -139,10 +139,10 @@
             </section>
 
             <section class="section">
-                <div class="section-title"><?= Lang::get('Plans') ?></div>
-                <div class="section-subtitle"><?= Lang::get('Access your plans') ?></div>
+                <div class="section-title">Planos</div>
+                <div class="section-subtitle">Veja os detalhes do seu plano e opções de upgrade.</div>
 
-                <a href="<?= BASE_URL ?>?c=plans&a=index" class="btn-primary"><?= Lang::get('Access Plans') ?></a>
+                <a href="<?= BASE_URL ?>?c=plans&a=index" class="btn-primary">Ver planos</a>
             </section>
 
             <button class="btn-primary" type="submit"><?= Lang::get('Save Changes') ?></button>
