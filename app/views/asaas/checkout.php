@@ -245,8 +245,8 @@
                     <label>CEP do titular</label>
                     <input class="input" name="card_postal_code" placeholder="00000-000" required>
 
-                    <label>Número do endereço</label>
-                    <input class="input" name="card_address_number" placeholder="Número" required>
+                    <label>Rua</label>
+                    <input class="input" name="card_address_number" placeholder="Nome da rua e número" required>
 
                     <div class="section-title" style="font-size:16px;margin-top:10px;">Dados do cartão</div>
 
