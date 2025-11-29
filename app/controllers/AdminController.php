@@ -135,6 +135,8 @@ class AdminController
         $error = '';
         $success = false;
 
+        $currentUserId = $_SESSION['user']['id'] ?? null;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $env = trim($_POST['asaas_env'] ?? 'sandbox');
             $sandboxKey = trim($_POST['asaas_sandbox_key'] ?? '');
@@ -152,8 +154,8 @@ class AdminController
                     $upd = $this->pdo->prepare("UPDATE api_configs SET api_key = :val, updated_at = NOW() WHERE id = :id");
                     $upd->execute(['val' => $env, 'id' => $rowEnv['id']]);
                 } else {
-                    $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (NULL, 'asaas_env', :val)");
-                    $ins->execute(['val' => $env]);
+                    $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (:uid, 'asaas_env', :val)");
+                    $ins->execute(['uid' => $currentUserId, 'val' => $env]);
                 }
 
                 // Salva key sandbox (provider = asaas_sandbox)
@@ -165,8 +167,8 @@ class AdminController
                     $upd = $this->pdo->prepare("UPDATE api_configs SET api_key = :val, updated_at = NOW() WHERE id = :id");
                     $upd->execute(['val' => $sandboxKey, 'id' => $rowKey['id']]);
                 } else {
-                    $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (NULL, 'asaas_sandbox', :val)");
-                    $ins->execute(['val' => $sandboxKey]);
+                    $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (:uid, 'asaas_sandbox', :val)");
+                    $ins->execute(['uid' => $currentUserId, 'val' => $sandboxKey]);
                 }
 
                 // Salva key produção (provider = asaas_production)
@@ -179,8 +181,8 @@ class AdminController
                     $upd->execute(['val' => $productionKey, 'id' => $rowKeyProd['id']]);
                 } else {
                     if ($productionKey !== '') {
-                        $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (NULL, 'asaas_production', :val)");
-                        $ins->execute(['val' => $productionKey]);
+                        $ins = $this->pdo->prepare("INSERT INTO api_configs (user_id, provider, api_key) VALUES (:uid, 'asaas_production', :val)");
+                        $ins->execute(['uid' => $currentUserId, 'val' => $productionKey]);
                     }
                 }
 
