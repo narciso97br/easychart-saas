@@ -1,7 +1,7 @@
 <?php
 
 // defina aqui o ambiente atual
-define('ENVIRONMENT', 'development'); // 'development' ou 'production'
+define('ENVIRONMENT', 'production'); // 'development' ou 'production'
 
 // URL base por ambiente (ajuste as URLs conforme seu servidor)
 if (ENVIRONMENT === 'development') {
