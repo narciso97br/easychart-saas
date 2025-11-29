@@ -114,7 +114,11 @@ class AsaasClient
 
         $resp = self::request($method, $url, $apiKey, $payload);
         if ($resp['status'] < 200 || $resp['status'] >= 300) {
-            $msg = $resp['body']['errors'][0]['description'] ?? 'Erro ao criar/atualizar cliente no Asaas.';
+            $msg = $resp['body']['errors'][0]['description'] ?? null;
+            if (!$msg) {
+                $raw = is_string($resp['body_raw'] ?? null) ? $resp['body_raw'] : json_encode($resp['body']);
+                $msg = 'Erro ao criar/atualizar cliente no Asaas (HTTP ' . ($resp['status'] ?? '?') . '): ' . substr($raw ?? '', 0, 300);
+            }
             throw new RuntimeException($msg);
         }
 
@@ -150,7 +154,11 @@ class AsaasClient
 
         $resp = self::request('POST', $baseUrl . '/subscriptions', $apiKey, $payload);
         if ($resp['status'] < 200 || $resp['status'] >= 300) {
-            $msg = $resp['body']['errors'][0]['description'] ?? 'Erro ao criar assinatura no Asaas.';
+            $msg = $resp['body']['errors'][0]['description'] ?? null;
+            if (!$msg) {
+                $raw = is_string($resp['body_raw'] ?? null) ? $resp['body_raw'] : json_encode($resp['body']);
+                $msg = 'Erro ao criar assinatura no Asaas (HTTP ' . ($resp['status'] ?? '?') . '): ' . substr($raw ?? '', 0, 300);
+            }
             throw new RuntimeException($msg);
         }
 
