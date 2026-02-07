@@ -31,6 +31,10 @@ class PlanHelper
 
     public static function canConsumeTokens(PDO $pdo, int $userId, int $tokensToConsume): array
     {
+        if (defined('DISABLE_PLAN_LIMITS') && DISABLE_PLAN_LIMITS === true) {
+            return [true, null, null, null];
+        }
+
         $info  = self::getCurrentPlan($pdo, $userId);
         $plan  = $info['plan'];
         $status = $info['plan_status'];
@@ -89,6 +93,10 @@ class PlanHelper
 
     public static function canUploadSpreadsheet(PDO $pdo, int $userId): array
     {
+        if (defined('DISABLE_PLAN_LIMITS') && DISABLE_PLAN_LIMITS === true) {
+            return [true, null];
+        }
+
         $info  = self::getCurrentPlan($pdo, $userId);
         $plan  = $info['plan'];
         $status = $info['plan_status'];
@@ -122,6 +130,10 @@ class PlanHelper
 
     public static function canGenerateCharts(PDO $pdo, int $userId, int $newChartsCount = 1): array
     {
+        if (defined('DISABLE_PLAN_LIMITS') && DISABLE_PLAN_LIMITS === true) {
+            return [true, null];
+        }
+
         $info  = self::getCurrentPlan($pdo, $userId);
         $plan  = $info['plan'];
         $status = $info['plan_status'];
