@@ -32,13 +32,18 @@ class DashboardController
             $prompt        = trim($_POST['prompt'] ?? '');
             $spreadsheetId = (int)($_POST['spreadsheet_id'] ?? 0);
 
+            $isSuperAdmin = (($_SESSION['user']['role'] ?? 'user') === 'super_admin');
+
             // Upload opcional de novo arquivo direto pelo dashboard
             if (isset($_FILES['spreadsheet']) && $_FILES['spreadsheet']['error'] === UPLOAD_ERR_OK) {
                 // Respeita o mesmo limite de upload de planilhas do plano atual
-                [$canUpload, $planUploadError] = PlanHelper::canUploadSpreadsheet($pdo, (int)$user['id']);
-                if (!$canUpload) {
-                    $error = $planUploadError;
-                } else {
+                if (!$isSuperAdmin) {
+                    [$canUpload, $planUploadError] = PlanHelper::canUploadSpreadsheet($pdo, (int)$user['id']);
+                    if (!$canUpload) {
+                        $error = $planUploadError;
+                    }
+                }
+                if (!$error) {
                     $originalName = $_FILES['spreadsheet']['name'];
                     $tmpName      = $_FILES['spreadsheet']['tmp_name'];
                     $mimeType     = $_FILES['spreadsheet']['type'];
@@ -72,9 +77,11 @@ class DashboardController
             if (!$error) {
                 // Verifica limite de gráficos do plano atual (considerando que esta requisição pode gerar vários gráficos)
                 // Por simplicidade, assumimos ao menos 1 gráfico por requisição
-                [$canGenerate, $planChartError] = PlanHelper::canGenerateCharts($pdo, (int)$user['id'], 1);
-                if (!$canGenerate) {
-                    $error = $planChartError;
+                if (!$isSuperAdmin) {
+                    [$canGenerate, $planChartError] = PlanHelper::canGenerateCharts($pdo, (int)$user['id'], 1);
+                    if (!$canGenerate) {
+                        $error = $planChartError;
+                    }
                 }
             }
 
@@ -86,9 +93,11 @@ class DashboardController
                 } else {
                     // Verifica limite de tokens do plano atual antes de chamar a IA
                     // Não conseguimos saber o consumo exato antes da chamada, então garantimos ao menos que há saldo.
-                    [$canConsumeTokens, $planTokenError] = PlanHelper::canConsumeTokens($pdo, (int)$user['id'], 1);
-                    if (!$canConsumeTokens) {
-                        $error = $planTokenError;
+                    if (!$isSuperAdmin) {
+                        [$canConsumeTokens, $planTokenError] = PlanHelper::canConsumeTokens($pdo, (int)$user['id'], 1);
+                        if (!$canConsumeTokens) {
+                            $error = $planTokenError;
+                        }
                     }
 
                     if ($error) {

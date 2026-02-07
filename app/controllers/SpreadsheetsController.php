@@ -26,16 +26,20 @@ class SpreadsheetsController
         $this->requireAuth();
 
         $userId = $_SESSION['user']['id'];
+        $isSuperAdmin = (($_SESSION['user']['role'] ?? 'user') === 'super_admin');
         $error = '';
         $success = '';
 
         // Upload
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['spreadsheet'])) {
             // Verifica limite de uploads do plano atual
-            [$allowed, $planError] = PlanHelper::canUploadSpreadsheet($this->pdo, $userId);
-            if (!$allowed) {
-                $error = $planError;
-            } elseif ($_FILES['spreadsheet']['error'] === UPLOAD_ERR_OK) {
+            if (!$isSuperAdmin) {
+                [$allowed, $planError] = PlanHelper::canUploadSpreadsheet($this->pdo, $userId);
+                if (!$allowed) {
+                    $error = $planError;
+                }
+            }
+            if (!$error && $_FILES['spreadsheet']['error'] === UPLOAD_ERR_OK) {
                 $originalName = $_FILES['spreadsheet']['name'];
                 $tmpName      = $_FILES['spreadsheet']['tmp_name'];
                 $mimeType     = $_FILES['spreadsheet']['type'];
