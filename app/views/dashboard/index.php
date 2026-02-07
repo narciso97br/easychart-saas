@@ -304,32 +304,6 @@
             </div>
         </section>
 
-        <?php if (isset($monthTokensUsed)): ?>
-            <section class="kpi-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-label">Tokens (mês)</div>
-                        <div class="kpi-value"><?= (int)$monthTokensUsed ?></div>
-                    </div>
-                    <div class="kpi-icon purple">🔢</div>
-                </div>
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-label">Limite (mês)</div>
-                        <div class="kpi-value"><?= $monthTokenLimit === null ? 'Ilimitado' : (int)$monthTokenLimit ?></div>
-                    </div>
-                    <div class="kpi-icon blue">🎯</div>
-                </div>
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-label">Restante (mês)</div>
-                        <div class="kpi-value"><?= $monthTokensRemaining === null ? '—' : (int)$monthTokensRemaining ?></div>
-                    </div>
-                    <div class="kpi-icon green">✅</div>
-                </div>
-            </section>
-        <?php endif; ?>
-
         <?php if (!empty($error)): ?>
             <div style="margin-bottom:10px;font-size:13px;color:#b91c1c;background:#fee2e2;border-radius:8px;padding:6px 8px;max-width:720px;">
                 <?= htmlspecialchars($error) ?>

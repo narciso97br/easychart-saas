@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../core/Database.php';
-require_once __DIR__ . '/../helpers/PlanHelper.php';
 require_once __DIR__ . '/../helpers/DataIngestionHelper.php';
 require_once __DIR__ . '/../helpers/AnalysisEngine.php';
 
@@ -32,17 +31,8 @@ class DashboardController
             $prompt        = trim($_POST['prompt'] ?? '');
             $spreadsheetId = (int)($_POST['spreadsheet_id'] ?? 0);
 
-            $isSuperAdmin = (($_SESSION['user']['role'] ?? 'user') === 'super_admin');
-
             // Upload opcional de novo arquivo direto pelo dashboard
             if (isset($_FILES['spreadsheet']) && $_FILES['spreadsheet']['error'] === UPLOAD_ERR_OK) {
-                // Respeita o mesmo limite de upload de planilhas do plano atual
-                if (!$isSuperAdmin) {
-                    [$canUpload, $planUploadError] = PlanHelper::canUploadSpreadsheet($pdo, (int)$user['id']);
-                    if (!$canUpload) {
-                        $error = $planUploadError;
-                    }
-                }
                 if (!$error) {
                     $originalName = $_FILES['spreadsheet']['name'];
                     $tmpName      = $_FILES['spreadsheet']['tmp_name'];
@@ -75,42 +65,11 @@ class DashboardController
             }
 
             if (!$error) {
-                // Verifica limite de gráficos do plano atual (considerando que esta requisição pode gerar vários gráficos)
-                // Por simplicidade, assumimos ao menos 1 gráfico por requisição
-                if (!$isSuperAdmin) {
-                    [$canGenerate, $planChartError] = PlanHelper::canGenerateCharts($pdo, (int)$user['id'], 1);
-                    if (!$canGenerate) {
-                        $error = $planChartError;
-                    }
-                }
-            }
-
-            if (!$error) {
                 if ($spreadsheetId <= 0) {
                     $error = 'Please select or upload a file.';
                 } elseif ($prompt === '') {
                     $error = 'Please describe what you want to visualize.';
                 } else {
-                    // Verifica limite de tokens do plano atual antes de chamar a IA
-                    // Não conseguimos saber o consumo exato antes da chamada, então garantimos ao menos que há saldo.
-                    if (!$isSuperAdmin) {
-                        [$canConsumeTokens, $planTokenError] = PlanHelper::canConsumeTokens($pdo, (int)$user['id'], 1);
-                        if (!$canConsumeTokens) {
-                            $error = $planTokenError;
-                        }
-                    }
-
-                    if ($error) {
-                        // evita chamar a IA se já estourou o limite
-                        $aiPayload = [
-                            'status' => 'error',
-                            'error'  => $error,
-                        ];
-                        $lastChartResponse = $aiPayload;
-                        require __DIR__ . '/../views/dashboard/index.php';
-                        return;
-                    }
-
                     // Descobre caminho do arquivo selecionado
                     $sheetStmt = $pdo->prepare('SELECT stored_name, original_name, mime_type, size_bytes FROM spreadsheets WHERE id = :id AND user_id = :uid');
                     $sheetStmt->execute(['id' => $spreadsheetId, 'uid' => $user['id']]);
@@ -225,32 +184,6 @@ class DashboardController
         // Por enquanto, consideramos cada chart gerado como um "Saved Dashboard"
         $savedDashboards = $totalCharts;
         $aiInsights      = $totalCharts; // aproximar insights de charts
-
-        // Consumo de tokens do mês atual
-        $monthTokensUsed = 0;
-        $monthTokenLimit = null;
-        $monthTokensRemaining = null;
-        try {
-            $yearMonth = date('Y-m');
-            $stmt = $pdo->prepare('SELECT tokens_used FROM user_token_usage_monthly WHERE user_id = :uid AND year_month = :ym LIMIT 1');
-            $stmt->execute(['uid' => (int)$user['id'], 'ym' => $yearMonth]);
-            $row = $stmt->fetch();
-            $monthTokensUsed = $row ? (int)$row['tokens_used'] : 0;
-
-            $planInfo = PlanHelper::getCurrentPlan($pdo, (int)$user['id']);
-            $plan = $planInfo['plan'];
-            if ($plan && array_key_exists('monthly_token_limit', $plan)) {
-                $monthTokenLimit = $plan['monthly_token_limit'];
-                if ($monthTokenLimit !== null) {
-                    $monthTokensRemaining = (int)$monthTokenLimit - (int)$monthTokensUsed;
-                    if ($monthTokensRemaining < 0) {
-                        $monthTokensRemaining = 0;
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            // Mantém valores default
-        }
 
         // Planilhas do usuário para o select
         $stmt = $pdo->prepare('SELECT id, original_name FROM spreadsheets WHERE user_id = :uid ORDER BY created_at DESC');

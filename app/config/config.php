@@ -3,11 +3,10 @@
 // defina aqui o ambiente atual
 define('ENVIRONMENT', 'production'); // 'development' ou 'production'
 
-define('DISABLE_PLAN_LIMITS', true);
-
 define('DB_DEV_HOST', 'localhost');
 define('DB_DEV_NAME', 'easychart-saas');
 define('DB_DEV_USER', 'easychart-saas');
+
 define('DB_DEV_PASS', 'Yd8wEtQ*rjv$es41');
 define('DB_DEV_CHARSET', 'utf8');
 

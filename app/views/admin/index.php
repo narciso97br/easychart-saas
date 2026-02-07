@@ -81,12 +81,6 @@
         </div>
         <div class="page-subtitle"><?= Lang::get('System overview and user management') ?></div>
 
-        <div style="margin-bottom:16px;">
-            <a href="<?= BASE_URL ?>?c=admin&a=plans" style="display:inline-block;padding:8px 14px;border-radius:999px;border:1px solid #e5e7eb;font-size:13px;color:#374151;text-decoration:none;background:#ffffff;box-shadow:0 4px 10px rgba(15,23,42,0.04);">
-                Gerenciar planos
-            </a>
-        </div>
-
         <section class="kpi-grid">
             <div class="kpi-card">
                 <div>
