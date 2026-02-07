@@ -24,24 +24,6 @@ class AsaasController
         }
     }
 
-    public function showCheckout()
-    {
-        $this->requireAuth();
-        $userSession = $_SESSION['user'];
-        $userId = (int)$userSession['id'];
-
-        $stmt = $this->pdo->prepare('SELECT full_name, email, cpf, phone FROM users WHERE id = :id');
-        $stmt->execute(['id' => $userId]);
-        $userRow = $stmt->fetch();
-
-        // Carrega info do plano premium (opcional, para mostrar preço/benefícios)
-        $planStmt = $this->pdo->prepare("SELECT * FROM plans WHERE slug = 'premium' LIMIT 1");
-        $planStmt->execute();
-        $premiumPlan = $planStmt->fetch();
-
-        require __DIR__ . '/../views/asaas/checkout.php';
-    }
-
     public function subscribePremium()
     {
         $this->requireAuth();
@@ -57,11 +39,9 @@ class AsaasController
         }
 
         // Dados do formulário
-        $fullName    = trim($_POST['full_name'] ?? '');
-        $cpf         = preg_replace('/\D+/', '', $_POST['cpf'] ?? '');
-        $phone       = preg_replace('/\D+/', '', $_POST['phone'] ?? '');
-        $postalCode  = preg_replace('/\D+/', '', $_POST['card_postal_code'] ?? '');
-        $addressNumber = trim($_POST['card_address_number'] ?? '');
+        $fullName = trim($_POST['full_name'] ?? '');
+        $cpf      = preg_replace('/\D+/', '', $_POST['cpf'] ?? '');
+        $phone    = preg_replace('/\D+/', '', $_POST['phone'] ?? '');
 
         $cardHolder = trim($_POST['card_holder_name'] ?? '');
         $cardNumber = preg_replace('/\D+/', '', $_POST['card_number'] ?? '');
@@ -69,7 +49,7 @@ class AsaasController
         $expYear    = trim($_POST['card_exp_year'] ?? '');
         $cardCvv    = trim($_POST['card_cvv'] ?? '');
 
-        if ($fullName === '' || $cpf === '' || $phone === '' || $postalCode === '' || $addressNumber === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
+        if ($fullName === '' || $cpf === '' || $phone === '' || $cardHolder === '' || $cardNumber === '' || $expMonth === '' || $expYear === '' || $cardCvv === '') {
             $error = 'Preencha todos os campos obrigatórios para assinar o plano Premium.';
         }
 
@@ -125,19 +105,17 @@ class AsaasController
                     $upd->execute([
                         'name' => $fullName,
                         'cpf'  => $cpf,
-                        'phone' => $phone,
+                        'phone'=> $phone,
                         'cust' => $asaasCustomerId,
                         'id'   => $userId,
                     ]);
 
                     // Cria assinatura mensal
                     $holderInfo = [
-                        'name'          => $fullName,
-                        'email'         => $userRow['email'],
-                        'cpf'           => $cpf,
-                        'phone'         => $phone,
-                        'postal_code'   => $postalCode,
-                        'address_number'=> $addressNumber,
+                        'name'  => $fullName,
+                        'email' => $userRow['email'],
+                        'cpf'   => $cpf,
+                        'phone' => $phone,
                     ];
                     $cardData = [
                         'holder_name' => $cardHolder,

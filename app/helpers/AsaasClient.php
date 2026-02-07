@@ -6,40 +6,26 @@ class AsaasClient
 {
     private static function getConfig(PDO $pdo): array
     {
-        // Busca configurações Asaas salvas no painel admin
-        $stmt = $pdo->prepare("SELECT provider, api_key FROM api_configs WHERE provider IN ('asaas_sandbox','asaas_production','asaas_env')");
+        // Busca qualquer configuração Asaas existente (independente do usuário)
+        $stmt = $pdo->prepare("SELECT provider, api_key FROM api_configs WHERE provider IN ('asaas_sandbox','asaas_env')");
         $stmt->execute();
         $rows = $stmt->fetchAll();
 
         $env = 'sandbox';
         $sandboxKey = '';
-        $productionKey = '';
         foreach ($rows as $row) {
             if ($row['provider'] === 'asaas_env') {
                 $env = $row['api_key'] ?: 'sandbox';
             } elseif ($row['provider'] === 'asaas_sandbox') {
                 $sandboxKey = $row['api_key'];
-            } elseif ($row['provider'] === 'asaas_production') {
-                $productionKey = $row['api_key'];
             }
         }
 
-        $env = $env === 'production' ? 'production' : 'sandbox';
+        $baseUrl = 'https://sandbox.asaas.com/api/v3';
+        $apiKey  = $sandboxKey;
 
-        if ($env === 'production') {
-            $baseUrl = 'https://api.asaas.com/api/v3';
-            $apiKey  = $productionKey;
-
-            if (!$apiKey) {
-                throw new RuntimeException('A API key de produção do Asaas não está configurada.');
-            }
-        } else {
-            $baseUrl = 'https://sandbox.asaas.com/api/v3';
-            $apiKey  = $sandboxKey;
-
-            if (!$apiKey) {
-                throw new RuntimeException('A API key de sandbox do Asaas não está configurada.');
-            }
+        if (!$apiKey) {
+            throw new RuntimeException('Asaas sandbox API key is not configured.');
         }
 
         return [
@@ -52,9 +38,8 @@ class AsaasClient
     {
         $ch = curl_init($url);
         $headers = [
-            'access_token: ' . $apiKey,
+            'Authorization: Bearer ' . $apiKey,
             'Content-Type: application/json',
-            'User-Agent: EasyChart/1.0 (+https://easychart.onsolutionsbrasil.com.br)'
         ];
 
         $options = [
@@ -115,11 +100,7 @@ class AsaasClient
 
         $resp = self::request($method, $url, $apiKey, $payload);
         if ($resp['status'] < 200 || $resp['status'] >= 300) {
-            $msg = $resp['body']['errors'][0]['description'] ?? null;
-            if (!$msg) {
-                $raw = is_string($resp['body_raw'] ?? null) ? $resp['body_raw'] : json_encode($resp['body']);
-                $msg = 'Erro ao criar/atualizar cliente no Asaas (HTTP ' . ($resp['status'] ?? '?') . '): ' . substr($raw ?? '', 0, 300);
-            }
+            $msg = $resp['body']['errors'][0]['description'] ?? 'Erro ao criar/atualizar cliente no Asaas.';
             throw new RuntimeException($msg);
         }
 
@@ -150,18 +131,12 @@ class AsaasClient
                 'email'       => $holderInfo['email'],
                 'cpfCnpj'     => $holderInfo['cpf'],
                 'mobilePhone' => $holderInfo['phone'],
-                'postalCode'  => $holderInfo['postal_code'] ?? null,
-                'addressNumber' => $holderInfo['address_number'] ?? null,
             ],
         ];
 
         $resp = self::request('POST', $baseUrl . '/subscriptions', $apiKey, $payload);
         if ($resp['status'] < 200 || $resp['status'] >= 300) {
-            $msg = $resp['body']['errors'][0]['description'] ?? null;
-            if (!$msg) {
-                $raw = is_string($resp['body_raw'] ?? null) ? $resp['body_raw'] : json_encode($resp['body']);
-                $msg = 'Erro ao criar assinatura no Asaas (HTTP ' . ($resp['status'] ?? '?') . '): ' . substr($raw ?? '', 0, 300);
-            }
+            $msg = $resp['body']['errors'][0]['description'] ?? 'Erro ao criar assinatura no Asaas.';
             throw new RuntimeException($msg);
         }
 

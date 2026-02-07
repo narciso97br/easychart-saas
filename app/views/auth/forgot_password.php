@@ -29,7 +29,7 @@
 <div class="page">
     <div class="card">
         <h1>Redefinir senha</h1>
-        <p class="subtitle">Informe o e-mail cadastrado para receber o link de redefinição.</p>
+        <p class="subtitle">Informe seu CPF ou e-mail e defina uma nova senha.</p>
 
         <?php if (!empty($error)): ?>
             <div class="error"><?= htmlspecialchars($error) ?></div>
@@ -37,18 +37,36 @@
 
         <?php if (!empty($success)): ?>
             <div class="success">
-                Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha.
+                Senha redefinida com sucesso. Você já pode fazer login.
             </div>
         <?php endif; ?>
 
         <form method="post">
+            <label>CPF</label>
+            <div class="input-wrapper">
+                <span class="input-icon">ID</span>
+                <input type="text" name="cpf" placeholder="Digite seu CPF" required>
+            </div>
+
             <label>E-mail</label>
             <div class="input-wrapper">
                 <span class="input-icon">@</span>
                 <input type="email" name="email" placeholder="Digite seu e-mail" required>
             </div>
 
-            <button class="btn-primary" type="submit">Enviar link de redefinição</button>
+            <label>Nova senha</label>
+            <div class="input-wrapper">
+                <span class="input-icon">&#128274;</span>
+                <input type="password" name="new_password" placeholder="Nova senha" required>
+            </div>
+
+            <label>Confirmar nova senha</label>
+            <div class="input-wrapper">
+                <span class="input-icon">&#128274;</span>
+                <input type="password" name="confirm_password" placeholder="Confirme a nova senha" required>
+            </div>
+
+            <button class="btn-primary" type="submit">Salvar nova senha</button>
         </form>
 
         <p class="muted-link">
