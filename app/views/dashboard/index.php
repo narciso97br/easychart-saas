@@ -251,6 +251,7 @@
             <nav class="top-nav">
                 <a href="<?= BASE_URL ?>?c=dashboard&a=index" class="active"><?= Lang::get('Dashboard') ?></a>
                 <a href="<?= BASE_URL ?>?c=spreadsheets&a=index"><?= Lang::get('Spreadsheets') ?></a>
+                <a href="<?= BASE_URL ?>?c=reports&a=index">Relatórios</a>
                 <a href="<?= BASE_URL ?>?c=settings&a=index"><?= Lang::get('Settings') ?></a>
                 <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'super_admin'): ?>
                 <a href="<?= BASE_URL ?>?c=admin&a=index"><?= Lang::get('AI Admin') ?></a>
@@ -303,6 +304,32 @@
             </div>
         </section>
 
+        <?php if (isset($monthTokensUsed)): ?>
+            <section class="kpi-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Tokens (mês)</div>
+                        <div class="kpi-value"><?= (int)$monthTokensUsed ?></div>
+                    </div>
+                    <div class="kpi-icon purple">🔢</div>
+                </div>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Limite (mês)</div>
+                        <div class="kpi-value"><?= $monthTokenLimit === null ? 'Ilimitado' : (int)$monthTokenLimit ?></div>
+                    </div>
+                    <div class="kpi-icon blue">🎯</div>
+                </div>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-label">Restante (mês)</div>
+                        <div class="kpi-value"><?= $monthTokensRemaining === null ? '—' : (int)$monthTokensRemaining ?></div>
+                    </div>
+                    <div class="kpi-icon green">✅</div>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <?php if (!empty($error)): ?>
             <div style="margin-bottom:10px;font-size:13px;color:#b91c1c;background:#fee2e2;border-radius:8px;padding:6px 8px;max-width:720px;">
                 <?= htmlspecialchars($error) ?>
@@ -312,6 +339,25 @@
             <div style="margin-bottom:10px;font-size:13px;color:#166534;background:#dcfce7;border-radius:8px;padding:6px 8px;max-width:720px;">
                 <?= htmlspecialchars($success) ?>
             </div>
+        <?php endif; ?>
+
+        <?php if (!empty($analysisReportId) || !empty($analysisReportText)): ?>
+            <section class="card-large" style="margin-bottom:16px;max-width:980px;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Relatório técnico gerado</div>
+                        <div class="card-subtitle">Relatório no formato fixo (ETAPAS 1–9).</div>
+                    </div>
+                    <?php if (!empty($analysisReportId)): ?>
+                        <a href="<?= BASE_URL ?>?c=reports&a=view&id=<?= (int)$analysisReportId ?>" style="font-size:13px;color:#2563eb;text-decoration:none;">Ver relatório</a>
+                    <?php endif; ?>
+                </div>
+                <?php if (!empty($analysisReportText)): ?>
+                    <pre style="white-space:pre-wrap;font-size:12px;background:#111827;color:#e5e7eb;border-radius:10px;padding:10px 12px;max-width:100%;overflow:auto;">
+<?= htmlspecialchars(mb_strimwidth((string)$analysisReportText, 0, 3000, "\n...")) ?>
+                    </pre>
+                <?php endif; ?>
+            </section>
         <?php endif; ?>
 
         <section class="card-large">
@@ -384,29 +430,33 @@
                         var el = document.getElementById(canvasId);
                         if (!el) return;
                         var ctx = el.getContext('2d');
+                        var type = data.type || 'line';
+                        if (type === 'boxplot' || type === 'gantt') type = 'bar';
                         new Chart(ctx, {
-                            type: data.type || 'line',
+                            type: type,
                             data: {
                                 labels: data.labels,
                                 datasets: [{
                                     label: data.title || 'AI Chart',
                                     data: data.values,
                                     borderColor: '#2563eb',
-                                    backgroundColor: 'rgba(37,99,235,0.12)',
+                                    backgroundColor: type === 'pie' ? [
+                                        '#2563eb','#22c55e','#f97316','#a855f7','#14b8a6','#ef4444','#0ea5e9','#84cc16','#eab308','#64748b'
+                                    ] : 'rgba(37,99,235,0.12)',
                                     tension: 0.25,
-                                    fill: true,
+                                    fill: type === 'line',
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
                                 plugins: {
-                                    legend: {display: false},
+                                    legend: {display: type === 'pie' || type === 'radar'},
                                     title: {display: false}
                                 },
                                 scales: {
-                                    x: {ticks: {autoSkip: true, maxTicksLimit: 12}},
-                                    y: {beginAtZero: false}
+                                    x: (type === 'pie' || type === 'radar') ? {} : {ticks: {autoSkip: true, maxTicksLimit: 12}},
+                                    y: (type === 'pie' || type === 'radar') ? {} : {beginAtZero: false}
                                 }
                             }
                         });

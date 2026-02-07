@@ -29,6 +29,64 @@ class PlanHelper
         ];
     }
 
+    public static function canConsumeTokens(PDO $pdo, int $userId, int $tokensToConsume): array
+    {
+        $info  = self::getCurrentPlan($pdo, $userId);
+        $plan  = $info['plan'];
+        $status = $info['plan_status'];
+
+        if ($tokensToConsume < 0) {
+            $tokensToConsume = 0;
+        }
+
+        if ($status === 'active' && isset($plan['slug']) && $plan['slug'] === 'premium') {
+            return [true, null, null, null];
+        }
+
+        $tokenLimit = $plan['monthly_token_limit'] ?? 0;
+        if ($tokenLimit === null) {
+            return [true, null, null, null];
+        }
+
+        $yearMonth = date('Y-m');
+
+        $stmt = $pdo->prepare('SELECT tokens_used FROM user_token_usage_monthly WHERE user_id = :uid AND year_month = :ym LIMIT 1');
+        $stmt->execute([
+            'uid' => $userId,
+            'ym'  => $yearMonth,
+        ]);
+        $row = $stmt->fetch();
+        $used = $row ? (int)$row['tokens_used'] : 0;
+
+        $remaining = (int)$tokenLimit - $used;
+
+        if ($tokenLimit > 0 && ($tokensToConsume > $remaining)) {
+            return [false, 'Limite mensal de tokens atingido para o seu plano. Assine/atualize o plano para continuar.', $used, (int)$tokenLimit];
+        }
+
+        return [true, null, $used, (int)$tokenLimit];
+    }
+
+    public static function addTokenUsage(PDO $pdo, int $userId, int $tokensUsed): void
+    {
+        if ($tokensUsed <= 0) {
+            return;
+        }
+
+        $yearMonth = date('Y-m');
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO user_token_usage_monthly (user_id, year_month, tokens_used) '
+            . 'VALUES (:uid, :ym, :t) '
+            . 'ON DUPLICATE KEY UPDATE tokens_used = tokens_used + VALUES(tokens_used), updated_at = NOW()'
+        );
+        $stmt->execute([
+            'uid' => $userId,
+            'ym'  => $yearMonth,
+            't'   => $tokensUsed,
+        ]);
+    }
+
     public static function canUploadSpreadsheet(PDO $pdo, int $userId): array
     {
         $info  = self::getCurrentPlan($pdo, $userId);

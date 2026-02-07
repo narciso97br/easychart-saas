@@ -90,6 +90,7 @@
                 <th>Preço</th>
                 <th>Uploads/mês</th>
                 <th>Gráficos/mês</th>
+                <th>Tokens/mês</th>
                 <th>Status</th>
                 <th>Ações</th>
             </tr>
@@ -106,6 +107,7 @@
                         <td>R$ <?= number_format((int)$p['price_cents'] / 100, 2, ',', '.') ?></td>
                         <td><?= $p['monthly_spreadsheet_limit'] === null ? 'Ilimitado' : (int)$p['monthly_spreadsheet_limit'] ?></td>
                         <td><?= $p['monthly_chart_limit'] === null ? 'Ilimitado' : (int)$p['monthly_chart_limit'] ?></td>
+                        <td><?= !array_key_exists('monthly_token_limit', $p) || $p['monthly_token_limit'] === null ? 'Ilimitado' : (int)$p['monthly_token_limit'] ?></td>
                         <td>
                             <?php if (!empty($p['is_active'])): ?>
                                 <span class="badge badge-active">Ativo</span>

@@ -100,6 +100,13 @@
                             ? 'Gráficos gerados ilimitados'
                             : (int)$freePlan['monthly_chart_limit'] . ' gráfico gerado por mês' ?>
                     </div>
+                    <?php if (array_key_exists('monthly_token_limit', $freePlan)): ?>
+                    <div class="plan-feature">
+                        <?= ($freePlan['monthly_token_limit'] ?? null) === null
+                            ? 'Tokens ilimitados'
+                            : (int)$freePlan['monthly_token_limit'] . ' tokens por mês' ?>
+                    </div>
+                    <?php endif; ?>
                     <div class="plan-feature muted">Suporte padrão por e-mail</div>
                     <div class="plan-feature muted">Ideal para começar a testar o EasyChart</div>
                 </article>
@@ -122,6 +129,13 @@
                             ? 'Geração de gráficos ilimitada'
                             : (int)$premiumPlan['monthly_chart_limit'] . ' gráficos por mês' ?>
                     </div>
+                    <?php if (array_key_exists('monthly_token_limit', $premiumPlan)): ?>
+                    <div class="plan-feature">
+                        <?= ($premiumPlan['monthly_token_limit'] ?? null) === null
+                            ? 'Tokens ilimitados'
+                            : (int)$premiumPlan['monthly_token_limit'] . ' tokens por mês' ?>
+                    </div>
+                    <?php endif; ?>
                     <div class="plan-feature">Suporte prioritário por e-mail</div>
                     <div class="plan-feature">Cobrança automática segura via Asaas</div>
 

@@ -166,4 +166,141 @@ class AdminController
 
         require __DIR__ . '/../views/admin/user.php';
     }
+
+    public function plans()
+    {
+        $this->requireSuperAdmin();
+
+        $stmt = $this->pdo->prepare('SELECT * FROM plans ORDER BY price_cents ASC');
+        $stmt->execute();
+        $plans = $stmt->fetchAll();
+
+        require __DIR__ . '/../views/admin/plans_index.php';
+    }
+
+    public function editPlan()
+    {
+        $this->requireSuperAdmin();
+
+        $id = (int)($_GET['id'] ?? 0);
+        $plan = null;
+        $error = '';
+        $success = false;
+
+        if ($id > 0) {
+            $stmt = $this->pdo->prepare('SELECT * FROM plans WHERE id = :id LIMIT 1');
+            $stmt->execute(['id' => $id]);
+            $plan = $stmt->fetch() ?: null;
+            if (!$plan) {
+                $error = 'Plano não encontrado.';
+            }
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = trim($_POST['name'] ?? '');
+            $slug = trim($_POST['slug'] ?? '');
+            $priceCents = (int)($_POST['price_cents'] ?? 0);
+
+            $monthlySpreadsheetLimitRaw = trim((string)($_POST['monthly_spreadsheet_limit'] ?? ''));
+            $monthlyChartLimitRaw = trim((string)($_POST['monthly_chart_limit'] ?? ''));
+            $monthlyTokenLimitRaw = trim((string)($_POST['monthly_token_limit'] ?? ''));
+
+            $monthlySpreadsheetLimit = $monthlySpreadsheetLimitRaw === '' ? null : (int)$monthlySpreadsheetLimitRaw;
+            $monthlyChartLimit = $monthlyChartLimitRaw === '' ? null : (int)$monthlyChartLimitRaw;
+            $monthlyTokenLimit = $monthlyTokenLimitRaw === '' ? null : (int)$monthlyTokenLimitRaw;
+
+            $isActive = !empty($_POST['is_active']) ? 1 : 0;
+
+            if ($name === '' || $slug === '') {
+                $error = 'Informe nome e slug.';
+            } else {
+                // Garante slug único (exceto no próprio registro)
+                $stmt = $this->pdo->prepare('SELECT id FROM plans WHERE slug = :slug LIMIT 1');
+                $stmt->execute(['slug' => $slug]);
+                $existing = $stmt->fetch();
+                if ($existing && (int)$existing['id'] !== (int)($plan['id'] ?? 0)) {
+                    $error = 'Slug já em uso. Escolha outro.';
+                }
+            }
+
+            if (!$error) {
+                if (!empty($plan['id'])) {
+                    $stmt = $this->pdo->prepare(
+                        'UPDATE plans SET name = :name, slug = :slug, price_cents = :price, '
+                        . 'monthly_spreadsheet_limit = :msl, monthly_chart_limit = :mcl, monthly_token_limit = :mtl, '
+                        . 'is_active = :active, updated_at = NOW() '
+                        . 'WHERE id = :id'
+                    );
+                    $stmt->execute([
+                        'name' => $name,
+                        'slug' => $slug,
+                        'price' => $priceCents,
+                        'msl' => $monthlySpreadsheetLimit,
+                        'mcl' => $monthlyChartLimit,
+                        'mtl' => $monthlyTokenLimit,
+                        'active' => $isActive,
+                        'id' => (int)$plan['id'],
+                    ]);
+                    $success = true;
+                } else {
+                    $stmt = $this->pdo->prepare(
+                        'INSERT INTO plans (name, slug, price_cents, currency, monthly_spreadsheet_limit, monthly_chart_limit, monthly_token_limit, is_active) '
+                        . 'VALUES (:name, :slug, :price, :currency, :msl, :mcl, :mtl, :active)'
+                    );
+                    $stmt->execute([
+                        'name' => $name,
+                        'slug' => $slug,
+                        'price' => $priceCents,
+                        'currency' => 'BRL',
+                        'msl' => $monthlySpreadsheetLimit,
+                        'mcl' => $monthlyChartLimit,
+                        'mtl' => $monthlyTokenLimit,
+                        'active' => $isActive,
+                    ]);
+                    $success = true;
+                    $id = (int)$this->pdo->lastInsertId();
+                }
+
+                $stmt = $this->pdo->prepare('SELECT * FROM plans WHERE id = :id LIMIT 1');
+                $stmt->execute(['id' => $id]);
+                $plan = $stmt->fetch() ?: $plan;
+            }
+        }
+
+        if (!$plan) {
+            $plan = [
+                'name' => '',
+                'slug' => '',
+                'price_cents' => 0,
+                'monthly_spreadsheet_limit' => null,
+                'monthly_chart_limit' => null,
+                'monthly_token_limit' => null,
+                'is_active' => 1,
+            ];
+        }
+
+        require __DIR__ . '/../views/admin/plans_form.php';
+    }
+
+    public function deletePlan()
+    {
+        $this->requireSuperAdmin();
+
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id > 0) {
+            $stmt = $this->pdo->prepare("SELECT slug FROM plans WHERE id = :id LIMIT 1");
+            $stmt->execute(['id' => $id]);
+            $row = $stmt->fetch();
+
+            // Evita apagar o plano free/premium por segurança
+            $slug = $row['slug'] ?? '';
+            if (!in_array($slug, ['free', 'premium'], true)) {
+                $del = $this->pdo->prepare('DELETE FROM plans WHERE id = :id');
+                $del->execute(['id' => $id]);
+            }
+        }
+
+        header('Location: ' . BASE_URL . '?c=admin&a=plans');
+        exit;
+    }
 }
